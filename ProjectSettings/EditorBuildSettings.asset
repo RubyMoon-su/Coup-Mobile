@@ -8,4 +8,16 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu Sence/Mainmenu.unity
     guid: ddd7c92bcdd1f2c49bfe1e99bf0cc5c8
+  - enabled: 1
+    path: Assets/Scenes/MainMenu Sence/MatchMaking.unity
+    guid: 136319d8c3dca3741b7b66ac646433df
+  - enabled: 1
+    path: Assets/Scenes/MainMenu Sence/Lobby.unity
+    guid: 581269a7f4822de43b128d8b0884115e
+  - enabled: 1
+    path: Assets/Scenes/MainMenu Sence/FindRoom.unity
+    guid: ae21cef128520624dbbc978fc5b75712
+  - enabled: 1
+    path: Assets/Scenes/MainMenu Sence/CreateRoom.unity
+    guid: 2f2f3094fea3a6e4a8d11f2de2bc7855
   m_configObjects: {}

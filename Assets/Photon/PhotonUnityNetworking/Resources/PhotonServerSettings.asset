@@ -36,6 +36,17 @@ MonoBehaviour:
   RpcList:
   - ClickRpc
   - DestroyRpc
+  - PlayerEnterRoom_Function
+  - PlayerLeftRoom_Function
+  - Switch_Ower_Room
+  - PlayerSlot_Update
+  - RoomProperties_Update
+  - UpdateProperties_CardInfo
+  - UpdateProperties_PlayerSlotInfo
+  - UpdateProperties_StartInfo
+  - Add_PlayerSlot
+  - Remove_PlayerSlot
+  - Update_PlayerSlot
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

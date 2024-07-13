@@ -1,42 +1,49 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
+using EventBus_System;
+using Coup_Mobile.Changescene;
 
-public class MulitPlayer_Menu : MonoBehaviour
+namespace Coup_Mobile.Menu
 {
-    [HideInInspector] private Menu_Main mainmenu;
-
-    #region  Start Component
-    void Awake()
+    public class MulitPlayer_Menu : MonoBehaviour
     {
-        InstallComponent();
-    } 
+        [HideInInspector] private Menu_Main mainmenu;
 
-    private void InstallComponent()
-    {
-        mainmenu = GetComponentInParent<Menu_Main>();
-    }
+        #region  Start Component
+        void Awake()
+        {
+            InstallComponent();
+        }
 
-    #endregion
+        private void InstallComponent()
+        {
+            mainmenu = GetComponentInParent<Menu_Main>();
+        }
 
-    public void CreateRoom_Function()
-    {
-        SceneManager.LoadScene("CreateRoom");
-    }
+        #endregion
 
-    public void JoinRoom_Function()
-    {
-        SceneManager.LoadScene("FindRoom");
-    }
+        #region Button Event
 
-    public void MatchMaking_Function()
-    {
-        SceneManager.LoadScene("MatchMaking");
-    }
+        public void CreateRoom_Function() => CallChangeScene_Event(ChangeScene.CreateRoom);
 
-    public void BackToMainMenu_Function()
-    {
-        mainmenu.ChangeMenuScene("MainMenu");
+
+        public void JoinRoom_Function() => CallChangeScene_Event(ChangeScene.FindRoom);
+
+
+        public void MatchMaking_Function() => CallChangeScene_Event(ChangeScene.MatchMaking);
+
+
+        public void BackToMainMenu_Function()
+        {
+            mainmenu.ChangeMenuScene("MainMenu");
+        }
+
+        #endregion
+
+        #region Call EventBus
+
+        private void CallChangeScene_Event(ChangeScene Cs) => EventBus_SceneManager<IEvent>.RaiseSceneManager_Event(Cs, false, null);
+
+
+        #endregion
     }
 }

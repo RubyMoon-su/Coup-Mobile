@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/Scenes/InGame Zone/InGame/InGame.unity
+    guid: 4d0aed541a6c2224ab20839e48459808
+  - enabled: 1
     path: Assets/Scenes/Menu Zone/MainMenu Sence/Into.unity
     guid: b8b5ad50fbedb3947ace726f8122c926
   - enabled: 1
@@ -23,4 +26,5 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Menu Zone/MainMenu Sence/FindRoom.unity
     guid: ae21cef128520624dbbc978fc5b75712
-  m_configObjects: {}
+  m_configObjects:
+    com.unity.input.settings: {fileID: 11400000, guid: 97aba36ba84dcd5419f67d70c0f85a83, type: 2}

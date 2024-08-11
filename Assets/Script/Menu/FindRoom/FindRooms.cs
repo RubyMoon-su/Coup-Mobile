@@ -2,7 +2,7 @@ using Photon.Pun;
 using UnityEngine;
 using UnityEngine.UI;
 using NetworkControl;
-using EventBus_System;
+using Coup_Mobile.EventBus;
 using Photon.Realtime;
 using Coup_Mobile.Changescene;
 using System.Collections.Generic;

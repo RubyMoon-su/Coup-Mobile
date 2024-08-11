@@ -1,12 +1,10 @@
 using System;
 using Photon.Pun;
 using UnityEngine;
+using Coup_Mobile.EventBus;
 using NetworkControl;
-using EventBus_System;
 using ExitGames.Client.Photon;
 using Coup_Mobile.Changescene;
-
-
 
 namespace Coup_Mobile.Menu
 {

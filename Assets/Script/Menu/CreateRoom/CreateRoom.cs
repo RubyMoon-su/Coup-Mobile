@@ -4,10 +4,9 @@ using UnityEngine;
 using NetworkControl;
 using UnityEngine.UI;
 using Photon.Realtime;
-using EventBus_System;
+using Coup_Mobile.EventBus;
 using ExitGames.Client.Photon;
 using Coup_Mobile.Changescene;
-using UnityEngine.SceneManagement;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 

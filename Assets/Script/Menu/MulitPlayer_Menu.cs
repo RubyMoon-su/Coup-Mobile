@@ -1,5 +1,5 @@
 using UnityEngine;
-using EventBus_System;
+using Coup_Mobile.EventBus;
 using Coup_Mobile.Changescene;
 
 namespace Coup_Mobile.Menu

@@ -1,8 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
-using EventBus_System;
+using Coup_Mobile.EventBus;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Coup_Mobile.Menu
 {

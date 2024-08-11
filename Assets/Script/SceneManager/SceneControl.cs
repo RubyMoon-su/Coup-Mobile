@@ -1,5 +1,5 @@
-using EventBus_System;
 using Photon.Pun;
+using Coup_Mobile.EventBus;
 
 namespace Coup_Mobile.Changescene
 {

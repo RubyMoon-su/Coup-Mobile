@@ -84,7 +84,7 @@ public class Lobby_SlotControl : MonoBehaviourPun, ILobby_Observer
 
     #region Class Control
 
-
+    
     public IEnumerator Lobby_Control()
     {
         int Timer = 0;

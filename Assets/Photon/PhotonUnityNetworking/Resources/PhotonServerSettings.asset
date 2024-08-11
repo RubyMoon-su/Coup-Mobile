@@ -47,6 +47,8 @@ MonoBehaviour:
   - Add_PlayerSlot
   - Remove_PlayerSlot
   - Update_PlayerSlot
+  - CheckAllPlayer_State
+  - UpdateRequest_Command
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

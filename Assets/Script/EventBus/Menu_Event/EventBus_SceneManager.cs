@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Coup_Mobile.Changescene;
 
-namespace EventBus_System
+namespace Coup_Mobile.EventBus
 {
     public static class EventBus_SceneManager<T> where T : IEvent
     {

@@ -5,10 +5,15 @@ using Photon.Pun;
 using Photon.Realtime;
 using Coup_Mobile.InGame.GameManager;
 using Coup_Mobile.Menu.GameSetting_Data;
-using ExitGames.Client.Photon;
+using Coup_Mobile.InGame.PlayerData;
+using System.Threading.Tasks;
 
 public class NetworkTest : MonoBehaviourPunCallbacks
 {
+    [SerializeField] public bool OnOwner = false;
+    [SerializeField] public bool OnStart = false;
+    [SerializeField] public string PlayerName = "player";
+
     public void Start()
     {
         Debug.Log("Start Test");
@@ -18,45 +23,91 @@ public class NetworkTest : MonoBehaviourPunCallbacks
     public override void OnConnectedToMaster()
     {
         Debug.Log("Connected Test");
-        PhotonNetwork.JoinOrCreateRoom("Test Room" , new RoomOptions() , TypedLobby.Default);
+        if (OnOwner)
+        {
+            PhotonNetwork.JoinOrCreateRoom("Test Room", new RoomOptions(), TypedLobby.Default);
+        }
+        else
+        {
+            PhotonNetwork.JoinRandomRoom();
+        }
+
     }
 
-    public override void OnJoinedRoom()
+    public async override void OnJoinedRoom()
     {
-        Debug.Log("Join Test");
-        CharacterSetting Character = new CharacterSetting();
-        Character.SetDefalult_Setting();
+        PhotonNetwork.LocalPlayer.NickName = PlayerName;
 
-        PropertiesSetting Properties = new PropertiesSetting();
-        Properties.SetDefalult_Setting();
-
-        AdvanceSetting Advance = new AdvanceSetting();
-        Advance.SetDefalult_Setting();
-
-        GameSetting NewGame = new GameSetting()
+        if (OnOwner)
         {
-            gameMode = GameMode.NormalGame,
-            allPlayerData = new List<Coup_Mobile.InGame.PlayerData.Player_Data>
+            Debug.LogError("OnJoin");
+            int Time = 0;
+            int max = 30;
+
+            while (!OnStart)
             {
-                new Coup_Mobile.InGame.PlayerData.Player_Data(){playerName = "Jo"},
-                new Coup_Mobile.InGame.PlayerData.Player_Data(){playerName = "Ice"},
-                new Coup_Mobile.InGame.PlayerData.Player_Data(){playerName = "Boom"},
-                new Coup_Mobile.InGame.PlayerData.Player_Data(){playerName = "Hee"},
-            },
-            allPlayerInGame = 4,
-            characterSetting = Character,
-            propertiesSetting = Properties,
-            advanceSetting = Advance,
-        };
+                await Task.Delay(1000);
 
-        string Gamesetting_Json = JsonUtility.ToJson(NewGame);
+                Time++;
 
-        ExitGames.Client.Photon.Hashtable NewProperties = new ExitGames.Client.Photon.Hashtable()
-        {
+                Debug.Log("Wait For Player" + Time);
+
+                if (max <= Time)
+                {
+                    Debug.LogError("Network Time out");
+                    return;
+                }
+            }
+
+            CharacterSetting Character = new CharacterSetting();
+            Character.SetDefalult_Setting();
+
+            PropertiesSetting Properties = new PropertiesSetting();
+            Properties.SetDefalult_Setting();
+
+            AdvanceSetting Advance = new AdvanceSetting();
+            Advance.SetDefalult_Setting();
+
+            var AllPlayerInGame = PhotonNetwork.CurrentRoom.Players;
+            List<Player_Data> PlayerInfo = new List<Player_Data>();
+
+            GameSetting NewGame = new GameSetting()
+            {
+                gameMode = GameMode.NormalGame,
+
+                allPlayerInGame = 4,
+                characterSetting = Character,
+                propertiesSetting = Properties,
+                advanceSetting = Advance,
+            };
+
+            foreach (var kvp in AllPlayerInGame)
+            {
+                Player player = kvp.Value;
+
+                Player_Data NewID = new Player_Data
+                {
+                    playerName = player.NickName,
+                };
+
+                PlayerInfo.Add(NewID);
+            }
+
+            NewGame.allPlayerData = PlayerInfo;
+
+            string Gamesetting_Json = JsonUtility.ToJson(NewGame);
+
+            ExitGames.Client.Photon.Hashtable NewProperties = new ExitGames.Client.Photon.Hashtable()
+            {
             {"GameSetting" , Gamesetting_Json}
-        };
+            };
 
-        PhotonNetwork.CurrentRoom.SetCustomProperties(NewProperties);
+            PhotonNetwork.CurrentRoom.SetCustomProperties(NewProperties);
+        }
+        else 
+        {
+            Debug.LogError("OnJoin");
+        }
     }
 
     public override void OnRoomPropertiesUpdate(ExitGames.Client.Photon.Hashtable propertiesThatChanged)

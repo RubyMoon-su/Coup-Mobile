@@ -12,7 +12,7 @@ namespace Coup_Mobile.InGame.GameManager.Ui
             throw new System.NotImplementedException();
         }
 
-        public override void OnInteractive_UI()
+        public override void OnInteractive_UI(string requestment , object packet_Data)
         {
             throw new System.NotImplementedException();
         }

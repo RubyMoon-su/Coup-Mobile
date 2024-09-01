@@ -115,8 +115,6 @@ namespace Coup_Mobile.InGame.GameManager
                 Debug.LogError(ex);
                 install_complate = false;
             }
-
-
         }
 
         public T Request_Command<T>(T PacketData) where T : IInGameEvent
@@ -149,6 +147,11 @@ namespace Coup_Mobile.InGame.GameManager
 
                         break;
                     case GameManager_Event.GameUiManager:
+                        
+                        GameUIManager_Return Return_UIManager = gameUiManager.GameUIManager_Control(gameManager_Data);
+
+                        Return_Data = Return_UIManager;
+
                         break;
                     case GameManager_Event.GameNetworkManager:
 
@@ -196,8 +199,9 @@ namespace Coup_Mobile.InGame.GameManager
             playerManager = new PlayerManager(this, gameSetting);
             gameStateManager = new GameStateManager(this);
             gameResourceManager = new GameResourceManager(this, gameSetting);
+            gameNetworkManager = GetComponent<GameNetworkManager>();
+            gameNetworkManager.Install_System();
             gameUiManager = new GameUiManager(this);
-            gameNetworkManager = new GameNetworkManager(this);
 
             yield break;
         }

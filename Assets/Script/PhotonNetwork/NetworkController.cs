@@ -13,6 +13,8 @@ namespace NetworkControl
         private NetworkController instance;
         private Network_Observer_Notification networkobserver;
 
+        
+
         void Awake()
         {
             if (instance != null && instance != this)

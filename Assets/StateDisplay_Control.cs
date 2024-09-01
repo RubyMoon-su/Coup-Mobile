@@ -1,10 +1,7 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using UnityEditor;
 using UnityEngine;
+using System.Threading.Tasks;
+using System.Collections.Generic;
 
 public class StateDisplay_Control : MonoBehaviour
 {
@@ -21,12 +18,6 @@ public class StateDisplay_Control : MonoBehaviour
     [SerializeField] private bool isStateMove;
 
     #region Process And Local Function
-    public void Start()
-    {
-        Debug.Log("StartLoad");
-
-        Load_ObjectAndPosition();
-    }
 
     void Update()
     {
@@ -41,7 +32,7 @@ public class StateDisplay_Control : MonoBehaviour
 
     #endregion
 
-    #region Request OutSide State
+    #region Event Control
 
     public void Update_PositionState()
     {
@@ -74,11 +65,9 @@ public class StateDisplay_Control : MonoBehaviour
         }
     }
 
-
-
     public void Setting_StateInfo()
     {
-
+        Load_ObjectAndPosition();
     }
 
     #endregion
@@ -176,7 +165,7 @@ public class StateDisplay_Control : MonoBehaviour
 
                 stateObject_WithPos.Add(new Tuple<int, Transform>(i, stateObject[i]));
 
-                Debug.Log($"WithPos {stateObject_WithPos[i].Item2.name} is Current Index {stateObject_WithPos[i].Item1}");
+                //Debug.Log($"WithPos {stateObject_WithPos[i].Item2.name} is Current Index {stateObject_WithPos[i].Item1}");
             }
             else
             {
@@ -184,7 +173,7 @@ public class StateDisplay_Control : MonoBehaviour
 
                 stateObject_OutPos.Add(new Tuple<int, Transform>(OutPosition_index, stateObject[i]));
 
-                Debug.Log($"OutPos {stateObject_OutPos[OutPosition_index].Item2.name} is Current Index {stateObject_OutPos[OutPosition_index].Item1}");
+                //Debug.Log($"OutPos {stateObject_OutPos[OutPosition_index].Item2.name} is Current Index {stateObject_OutPos[OutPosition_index].Item1}");
 
                 OutPosition_index++;
             }

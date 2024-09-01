@@ -23,7 +23,7 @@ namespace Coup_Mobile.InGame.GameManager.Ui
         }
 
         protected abstract void Install_System();
-        public abstract void OnInteractive_UI();
+        public abstract void OnInteractive_UI(string requestment , object pakcet_Requestment);
 
         public virtual void OnEnabled(bool? Toggle = null)
         {
@@ -40,7 +40,6 @@ namespace Coup_Mobile.InGame.GameManager.Ui
         protected virtual object CreatePacket_Request(GameManager_Event Event, object EndPoint, object PacketData = null)
         {
             object Reuslt_Converted = EventBus_PacketRequest.CreatePacket_Request_InGameManager(Event, EndPoint, PacketData);
-
             return Reuslt_Converted;
         }
 

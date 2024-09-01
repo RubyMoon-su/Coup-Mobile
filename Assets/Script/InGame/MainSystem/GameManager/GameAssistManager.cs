@@ -8,6 +8,10 @@ namespace Coup_Mobile.InGame.GameManager
     {
         None,
         CommandList_Assist,
+        TimerSystem_Assist,
+        StateSystem_Assist,
+
+        GetInstall_Complate,
     }
 
     public class GameAssistManager
@@ -18,14 +22,25 @@ namespace Coup_Mobile.InGame.GameManager
         private GameObject abilityUI_Prefab;
 
         private Transform abilityUI_Content;
-        private Transform abilityUI_Platform;
-        private Transform abilityUI_Disable;
         private Transform abilityUI_Control;
 
         private Transform abilityUI_ToggleButton;
 
         // Game PlayerInfo Ui Assist.
 
+
+        // Game TimerInfo Ui Assist.
+        private Transform timerDisplay_Instance;
+
+
+        // Game StateInfo Ui Assist.
+        private GameObject[] stateDisplay_Prefabs;
+        private Transform stateDisplay_Instance;
+        private Transform statePosition_Path;
+        private Transform stateObject_Path;
+        private Transform stateBackGround_Path;
+
+        private bool install_Complate = false;
 
         public GameAssistManager(GameManager gameManager)
         {
@@ -36,24 +51,55 @@ namespace Coup_Mobile.InGame.GameManager
 
         private void LoadAssist()
         {
-            Load_CommandList_Assist();
+            try
+            {
+                Load_CommandList_Assist();
+
+                Load_TimerControl_Assist();
+
+                Load_StateDisplayControl_Assist();
+
+                install_Complate = true;
+            }
+            catch (System.Exception ex)
+            {
+                Debug.LogError(ex);
+
+                install_Complate = false;
+            }
         }
 
         private void Load_CommandList_Assist()
         {
             abilityUI_Prefab = Resources.Load<GameObject>("CommandList_Sort");
 
-            Transform CommandInfo_Path = GameObject.Find("InGane_Canvas/Ui_Interface/CommandInfo").transform;
-
-            abilityUI_Platform = CommandInfo_Path.Find("Command_List");
+            Transform CommandInfo_Path = GameObject.Find("InGane_Canvas/Ui_Interface/CommandInfo").transform; ;
 
             abilityUI_Content = CommandInfo_Path.Find($"Scroll View/Viewport/Content");
-
-            abilityUI_Disable = CommandInfo_Path.Find("Scroll View/Viewport/Disable_Sort");
 
             abilityUI_Control = CommandInfo_Path.Find($"Scroll View");
 
             abilityUI_ToggleButton = CommandInfo_Path.Find("Command_Button");
+        }
+
+        private void Load_TimerControl_Assist()
+        {
+            timerDisplay_Instance = GameObject.Find("InGane_Canvas/Ui_Interface/StateInfo/TimerDisplay").transform;
+        }
+
+        private void Load_StateDisplayControl_Assist()
+        {
+            stateDisplay_Prefabs = Resources.LoadAll<GameObject>("State_UI/");
+
+            Transform StateInfo_Path = GameObject.Find("InGane_Canvas/Ui_Interface/StateInfo").transform;
+
+            stateDisplay_Instance = StateInfo_Path;
+
+            statePosition_Path = StateInfo_Path.Find("StateDisplay/Position").transform;
+
+            stateObject_Path = StateInfo_Path.Find("StateDisplay/StateObject").transform;
+
+            stateBackGround_Path = StateInfo_Path.Find("StateDisplay/StateObject").transform;
         }
 
         public GameAssistManager_Return GameAssistManager_Control(GameManager_Data Request_Data)
@@ -62,7 +108,6 @@ namespace Coup_Mobile.InGame.GameManager
             object Return_Packet = null;
 
             GameAssistManager_List EndPoint;
-
             if (Request_Data.EndPoint is GameAssistManager_List GAM_List)
             {
                 EndPoint = GAM_List;
@@ -82,9 +127,6 @@ namespace Coup_Mobile.InGame.GameManager
                             case "Control":
                                 Return_Packet = abilityUI_Control;
                                 break;
-                            case "Disable_Transform":
-                                Return_Packet = abilityUI_Disable;
-                                break;
                             case "Button":
                                 Return_Packet = abilityUI_ToggleButton;
                                 break;
@@ -93,7 +135,42 @@ namespace Coup_Mobile.InGame.GameManager
                                 break;
 
                         }
+                        break;
+                    case GameAssistManager_List.TimerSystem_Assist:
+                        switch ((string)Request_Data.PacketData)
+                        {
+                            case "Instance":
+                                Return_Packet = timerDisplay_Instance;
+                                break;
+                        }
 
+
+                        break;
+                    case GameAssistManager_List.StateSystem_Assist:
+                        switch ((string)Request_Data.PacketData)
+                        {
+                            case "Instance":
+                                Return_Packet = stateDisplay_Instance;
+                                break;
+                            case "Position_Path":
+                                Return_Packet = statePosition_Path;
+                                break;
+                            case "StateObject_Path":
+                                Return_Packet = stateObject_Path;
+                                break;
+                            case "Prefubs":
+                                Return_Packet = stateDisplay_Prefabs;
+                                break;
+                            case "StateBackGround":
+                                Return_Packet = stateBackGround_Path;
+                                break;
+                            default:
+                                Debug.LogError($"{(string)Request_Data.PacketData} is not support This Type.");
+                                break;
+                        }
+                        break;
+                    case GameAssistManager_List.GetInstall_Complate:
+                        Return_Packet = install_Complate;
                         break;
                 }
 

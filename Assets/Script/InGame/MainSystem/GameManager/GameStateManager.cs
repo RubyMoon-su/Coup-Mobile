@@ -29,8 +29,13 @@ namespace Coup_Mobile.InGame.GameManager
         GetNextState,
         GetPreviousState,
 
+        GetAll_StarterState,
+        GetAll_MainState,
+
         // Field Getter.
         GetInstall_Complate,
+
+        UpdateStateNetwork,
     }
     public enum GameState_List
     {
@@ -60,7 +65,7 @@ namespace Coup_Mobile.InGame.GameManager
         Player_Embezzlement_Command,
         Player_Embezzlement_Result_Command,
 
-      
+
 
         #region Custorm Game
 
@@ -68,10 +73,9 @@ namespace Coup_Mobile.InGame.GameManager
 
     }
 
-    public class GameStateManager
+    public class GameStateManager : IOtherPlayerResponsive_Subject
     {
-        #region Gobal Field
-
+        #region GameState Template
         private readonly List<GameState_List> StarterState = new List<GameState_List>()
         {
             GameState_List.Check_Component_And_GameEvent ,
@@ -89,36 +93,40 @@ namespace Coup_Mobile.InGame.GameManager
             GameState_List.Wait_For_AllPlayerAndProcessGame,
         };
 
+        #endregion
+
+        #region  GameState Selection
+
         private List<GameState_List> StarterState_Result = new List<GameState_List>();
         private List<GameState_List> GameState_Result = new List<GameState_List>();
 
+        #endregion
+
+        #region  GameState Field
+
         // StarterGame State Field
-        private IGameState_Strategy
-          checkGameEvent_GameState
-        , setupPlayerProperties_GameState
-        , processPlayerSort_GameState
-        , setupPlayerTeam_GameState;
+        private Dictionary<GameState_List, IGameState_Strategy> starter_GameStateColleciton;
 
         // Main GameState Field
         // State Game Collection.
-        private IGameState_Strategy
-          sendCommand_GameState
-        , counterCommand_GameState
-        , verifyCommand_GameState
-        , resultCommand_GameState
-        , waitForAllPlayer_GameState;
-
-        private IGameState_Strategy
-          conversionCommand_GameState
-        , conversionResultCommand_GameState
-        , embezzlementCommand_GameState
-        , embezzlementCommandResult_GameState;
-
-        private GameManager gameManager;
-
-        private bool install_Complate = false;
+        private Dictionary<GameState_List, IGameState_Strategy> main_GameStateCollection;
 
         #endregion
+
+        // Ref Component.
+        private GameManager gameManager;
+
+        // State Component And Info.
+        private GameState_List currentState;
+        private GameState_List nextState;
+        private GameState_List beforeState;
+
+        // Update Form Network.
+        private List<IOtherPlayerResponsive_Oberver> registered_Notify = new List<IOtherPlayerResponsive_Oberver>();
+
+        // Game State Status.
+        private bool isGameStateStop = false;
+        private bool install_Complate = false;
 
         #region Install State Function
 
@@ -131,6 +139,119 @@ namespace Coup_Mobile.InGame.GameManager
             _ = Install_System();
         }
 
+        private async Task Install_System()
+        {
+            // Setup GameState List.
+            bool Setup_StarterState = await Process_StarterState(GameMode.NormalGame);
+
+            int Timer = 0;
+            int SystemTimeOut = GameManager.SYSTEM_TIMEOUT;
+
+            while (!Setup_StarterState)
+            {
+                await Task.Delay(1000);
+
+                Timer++;
+
+                if (Timer == SystemTimeOut)
+                {
+                    Debug.LogError("Can't Install StarterState.");
+                    return;
+                }
+            }
+
+            Timer = 0;
+
+            bool Setup_GameState = await Process_GameState(GameMode.NormalGame);
+
+            while (!Setup_GameState)
+            {
+                await Task.Delay(1000);
+
+                Timer++;
+
+                if (Timer == SystemTimeOut)
+                {
+                    Debug.LogError("Can't Install GameState.");
+                    return;
+                }
+            }
+
+            //------------ // Create Object GameState. // --------------//
+
+            await CreateAndCollection_StarterState();
+
+            await CreateAndCollection_MainState();
+
+            Debug.Log("GameStateManager Install Complate.");
+            install_Complate = true;
+
+            await Starter_GameState();
+        }
+
+        private async Task<bool> CreateAndCollection_StarterState()
+        {
+            bool Result_Collection = true;
+
+            await Task.Delay(0);
+
+            try
+            {
+                starter_GameStateColleciton = new Dictionary<GameState_List, IGameState_Strategy>();
+
+                // Starter GameState.
+                starter_GameStateColleciton.Add(GameState_List.Check_Component_And_GameEvent, new InitializationChecker_GameState(this));
+                starter_GameStateColleciton.Add(GameState_List.Setup_Player_Properties, new SetupPlayerProperties_GameState(this));
+                starter_GameStateColleciton.Add(GameState_List.Process_Player_Sort, new Process_PlayerSort_GameState(this));
+                starter_GameStateColleciton.Add(GameState_List.Player_Select_Team, new SetUp_PlayerTeam_GameState(this));
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Can't Create object instance starter State. {ex}");
+                Result_Collection = false;
+
+                return Result_Collection;
+            }
+
+            return Result_Collection;
+        }
+
+        private async Task<bool> CreateAndCollection_MainState()
+        {
+            bool Result_Collection = true;
+
+            await Task.Delay(0);
+
+            try
+            {
+                main_GameStateCollection = new Dictionary<GameState_List, IGameState_Strategy>();
+
+                // Main GameState.
+                main_GameStateCollection.Add(GameState_List.Player_Send_Command, new Player_SendCommand_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Player_Counter_Command, new Player_CounterCommand_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Player_Verifiy_Command, new Player_VerifyCommand_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Player_Result_Command, new Player_ResultCommand_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Wait_For_AllPlayerAndProcessGame, new WaitForAllPlayer_GameState(this));
+
+                main_GameStateCollection.Add(GameState_List.Player_Conversion_Command, new Player_ConversionCommand_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Player_Conversion_Result_Command, new Player_ConversionResult_Command_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Player_Embezzlement_Command, new Player_EmbezzlementCommand_GameState(this));
+                main_GameStateCollection.Add(GameState_List.Player_Embezzlement_Result_Command, new Player_EmbezzlementResult_Command_GameState(this));
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Can't Create object instance starter State. {ex}");
+                Result_Collection = false;
+
+                return Result_Collection;
+            }
+
+            return Result_Collection;
+        }
+
+
+        #region  State Starter Function
+
         private async Task<bool> Process_GameState(GameMode gamemode)
         {
             List<GameState_List> GameState = new List<GameState_List>();
@@ -141,12 +262,9 @@ namespace Coup_Mobile.InGame.GameManager
                 switch (gamemode)
                 {
                     case GameMode.NormalGame:
-
                         GameState = this.GameState;
-
                         break;
                     case GameMode.RefomationGame:
-
                         GameState = new List<GameState_List>()
                         {
                             GameState_List.Player_Conversion_Command,
@@ -166,7 +284,6 @@ namespace Coup_Mobile.InGame.GameManager
                 }
 
                 GameState_Result = GameState;
-
                 return true;
             }
             catch
@@ -175,7 +292,7 @@ namespace Coup_Mobile.InGame.GameManager
             }
         }
 
-        private async Task<bool> Process_StarterState(GameMode gamemode)
+        private async Task<bool> Process_StarterState(GameMode gamemode , object CustormMode = null)
         {
             List<GameState_List> StarterState = new List<GameState_List>();
 
@@ -210,70 +327,9 @@ namespace Coup_Mobile.InGame.GameManager
             return true;
         }
 
-        private async Task Install_System()
-        {
-            // Setup GameState List.
-            bool Setup_StarterState = await Process_StarterState(GameMode.NormalGame);
-
-            int Timer = 0;
-            int SystemTimeOut = GameManager.GetSystemTimeout;
-
-            while (!Setup_StarterState)
-            {
-                await Task.Delay(1000);
-
-                Timer++;
-
-                if (Timer == SystemTimeOut)
-                {
-                    Debug.LogError("Can't Install StarterState.");
-                    return;
-                }
-            }
-
-            Timer = 0;
-
-            bool Setup_GameState = await Process_GameState(GameMode.NormalGame);
-
-            while (!Setup_GameState)
-            {
-                await Task.Delay(1000);
-
-                Timer++;
-
-                if (Timer == SystemTimeOut)
-                {
-                    Debug.LogError("Can't Install GameState.");
-                    return;
-                }
-            }
-
-            //------------ // Create Object GameState. // --------------//
-
-            // Starter GameState.
-            checkGameEvent_GameState = new CheckGameEvent_GameState(this);
-            setupPlayerProperties_GameState = new SetupPlayerProperties_GameState(this);
-            processPlayerSort_GameState = new Process_PlayerSort_GameState(this);
-            setupPlayerTeam_GameState = new SetUp_PlayerTeam_GameState(this);
+        #endregion
 
 
-            // Main GameState.
-            sendCommand_GameState = new Player_SendCommand_GameState(this);
-            counterCommand_GameState = new Player_CounterCommand_GameState(this);
-            verifyCommand_GameState = new Player_VerifyCommand_GameState(this);
-            resultCommand_GameState = new Player_ResultCommand_GameState(this);
-            waitForAllPlayer_GameState = new WaitForAllPlayer_GameState(this);
-
-            conversionCommand_GameState = new Player_ConversionCommand_GameState(this);
-            conversionResultCommand_GameState = new Player_ConversionResult_Command_GameState(this);
-            embezzlementCommand_GameState = new Player_EmbezzlementCommand_GameState(this);
-            embezzlementCommandResult_GameState = new Player_EmbezzlementResult_Command_GameState(this);
-
-            Debug.Log("GameStateManager Install Complate.");
-            install_Complate = true;
-
-            await Starter_GameState();
-        }
 
         #endregion
 
@@ -289,12 +345,12 @@ namespace Coup_Mobile.InGame.GameManager
                 {
                     // Control System Game State.
                     case GameStateManager_List.Start_StarterState:
+                    case GameStateManager_List.Start_MainState:
+                        isGameStateStop = false;
                         break;
                     case GameStateManager_List.Stop_StarterState:
-                        break;
-                    case GameStateManager_List.Start_MainState:
-                        break;
                     case GameStateManager_List.Stop_MainState:
+                        isGameStateStop = true;
                         break;
 
                     // Control Action Game State.
@@ -312,7 +368,14 @@ namespace Coup_Mobile.InGame.GameManager
                         break;
                     case GameStateManager_List.GetPreviousState:
                         break;
+                    case GameStateManager_List.GetAll_StarterState:
+                        Packet_Data = StarterState_Result;
+                        break;
+                    case GameStateManager_List.GetAll_MainState:
+                        Packet_Data = GameState_Result;
+                        break;
                     case GameStateManager_List.GetInstall_Complate: Packet_Data = install_Complate; break;
+                    case GameStateManager_List.UpdateStateNetwork: Notify(Request_Data.PacketData); break;
                 }
             }
 
@@ -344,88 +407,198 @@ namespace Coup_Mobile.InGame.GameManager
         #region Local Function
         private async Task Starter_GameState()
         {
-            while (!install_Complate)
-            {
-                await Task.Delay(1000);
-            }
+            await WaitInstallationComplate();
 
-            if (StarterState_Result.Count <= 0)
+            if (!HasStarterState())
             {
                 Debug.LogError("No StarterState Register.");
                 return;
             }
 
-            foreach (GameState_List State in StarterState_Result)
+
+            foreach (var State in StarterState_Result)
             {
                 Debug.LogWarning($"Starter State Run {State}");
-                IGameState_Strategy ProcessState = null;
 
-                switch (State)
+                beforeState = currentState;
+
+                var State_Selection = GetStarter_SelectionState(State);
+
+                if (State_Selection == null)
                 {
-                    case GameState_List.Check_Component_And_GameEvent:
-
-                        ProcessState = checkGameEvent_GameState;
-
-                        break;
-                    case GameState_List.Setup_Player_Properties:
-
-                        ProcessState = setupPlayerProperties_GameState;
-
-                        break;
-                    case GameState_List.Process_Player_Sort:
-
-                        ProcessState = processPlayerSort_GameState;
-
-                        break;
-                    case GameState_List.Player_Select_Team:
-
-                        ProcessState = setupPlayerTeam_GameState;
-
-                        break;
-                    default:
-                        Debug.LogError($"{State} is not StarterState Type.");
-                        return;
-                }
-
-                if (ProcessState == null)
-                {
-                    Debug.LogError($"ProcessState 'Starter_GameState' Is Null");
+                    Debug.LogError("State_Selection Is null");
                     return;
                 }
 
-                var Result = (GameState_Report)await ProcessState.ProcessGameState(new GameManager_Data());
+                if (isGameStateStop) return;
 
-                if (Result.GetReportStatus == false)
-                {
-                    Debug.LogError($"LoopStop {State}");
-                    if (Result.GetReportString != null) Debug.LogError($"{Result.GetReportString}");
-                    return;
-                }
-                else if (Result.GetReportString != null)
-                {
-                    Debug.LogError($"LoopStop System Message {Result.GetReportString}");
-                }
+                currentState = State;
 
+                var Result = await ProcessGameState(State_Selection, new GameManager_Data());
+
+                if (isGameStateStop || !ProcessResult(Result, State)) return;
+
+                Debug.Log("Next State");
             }
+
+            if (isGameStateStop) return;
+
             // Run Starter Complate.
             // Start MainGame State.
-            await Continue_GameState();
+            await Main_GameState();
         }
 
-        private async Task Continue_GameState()
+        private async Task Main_GameState()
         {
-            var Bool = await test();
+            await Task.Delay(0);
 
-            for (int i = 0; i < 0; i++)
+            await WaitInstallationComplate();
+
+            if (!HasMainState())
             {
+                Debug.LogError("No MainState Register.");
+                return;
+            }
 
+            foreach (var State in GameState_Result)
+            {
+                Debug.LogWarning($"Main State Run {State}");
+
+                var State_Selection = GetMain_SelectionState(State);
+
+                if (State_Selection == null)
+                {
+                    Debug.LogError("State_Selection Is null");
+                    return;
+                }
+
+                if (isGameStateStop) return;
+
+                currentState = State;
+
+                var Result = await ProcessGameState(State_Selection, new GameManager_Data());
+
+                if (isGameStateStop || !ProcessResult(Result, State)) return;
+
+                nextState = FindNextState_Main(State);
+
+                if ((int)nextState > Enum.GetNames(typeof(GameState_List)).Length)
+                {
+                    Debug.Log("Next Wave");
+                }
+                else
+                {
+                    Debug.Log("Next State");
+                }
+            }
+
+            // Loop State Main_GameState.
+            Contine_MainState();
+        }
+
+        private async void Contine_MainState()
+        {
+            await Main_GameState();
+        }
+
+        #region  Starter Handler Function
+
+        private async Task WaitInstallationComplate()
+        {
+            while (!install_Complate)
+            {
+                await Task.Delay(1000);
             }
         }
 
-        private async Task<bool> test()
+        private bool HasStarterState()
         {
-            await Task.Delay(1000);
+            return starter_GameStateColleciton.Count > 0;
+        }
+
+        private IGameState_Strategy GetStarter_SelectionState(GameState_List state)
+        {
+            var starterSelection = starter_GameStateColleciton[state];
+            if (starterSelection == null)
+            {
+                Debug.LogError("State_Selection is null");
+            }
+            return starterSelection;
+        }
+
+        private async Task<GameState_Report> ProcessGameState(IGameState_Strategy stateSelection, GameManager_Data requestEvent)
+        {
+            return (GameState_Report)await stateSelection.ProcessGameState(requestEvent);
+        }
+
+        private bool ProcessResult(GameState_Report result, object state)
+        {
+            if (result.GetReportStatus == false)
+            {
+                Debug.LogError($"LoopStop {state}");
+                if (result.GetReportString != null) Debug.LogError($"{result.GetReportString}");
+                isGameStateStop = true;
+                return false;
+            }
+
+            if (result.GetReportString != null)
+            {
+                isGameStateStop = false;
+                Debug.LogError($"LoopStop System Message {result.GetReportString}");
+            }
+
             return true;
+        }
+
+        #endregion
+
+        #region Main Handler Function
+
+        private bool HasMainState()
+        {
+            return main_GameStateCollection.Count > 0;
+        }
+
+        private IGameState_Strategy GetMain_SelectionState(GameState_List state)
+        {
+            var starterSelection = main_GameStateCollection[state];
+            if (starterSelection == null)
+            {
+                Debug.LogError("MainState_Selection is null");
+            }
+            return starterSelection;
+        }
+
+        private GameState_List FindNextState_Main(GameState_List gameState)
+        {
+            int index = (int)gameState;
+            index++;
+            if (index + 1 > Enum.GetValues(typeof(GameState_List)).Length) index = 0;
+
+            return (GameState_List)index;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Notify Form Network
+        public void Attach(IOtherPlayerResponsive_Oberver observer)
+        {
+            registered_Notify.Add(observer);
+        }
+
+        public void Detach(IOtherPlayerResponsive_Oberver observer)
+        {
+            registered_Notify.Remove(observer);
+        }
+
+        public void Notify(object PacketData)
+        {
+            foreach(var Registered in registered_Notify)
+            {
+                Registered.UpdateFormNetwork(PacketData);
+            }
         }
 
         #endregion

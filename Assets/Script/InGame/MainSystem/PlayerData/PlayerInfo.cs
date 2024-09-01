@@ -7,6 +7,9 @@ namespace Coup_Mobile.InGame.PlayerData
     {
         public string playerName;
 
+        public string[] usedCharacter;
+        public int usedCoin;
+
         public string GetPlayerName
         {
             get => playerName;

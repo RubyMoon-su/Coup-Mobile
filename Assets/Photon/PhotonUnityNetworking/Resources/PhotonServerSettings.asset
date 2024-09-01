@@ -49,6 +49,7 @@ MonoBehaviour:
   - Update_PlayerSlot
   - CheckAllPlayer_State
   - UpdateRequest_Command
+  - ShareResourceSetting
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0

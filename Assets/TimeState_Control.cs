@@ -1,7 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,7 +28,7 @@ public class TimeState_Control : MonoBehaviour
     void Start()
     {
         // Timer Component.
-        timer_UI = transform.Find("TimerDisplay/Timer").GetComponent<Text>();
+        timer_UI = transform.Find("Timer").GetComponent<Text>();
 
         isRuningTime = false;
     }
@@ -69,7 +66,6 @@ public class TimeState_Control : MonoBehaviour
     {
         // Stop Runing Time.
         isRuningTime = false;
-
         // Send event callback to Ui Manager.
     }
 

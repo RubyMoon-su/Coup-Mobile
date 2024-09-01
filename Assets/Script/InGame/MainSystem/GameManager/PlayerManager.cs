@@ -15,6 +15,7 @@ namespace Coup_Mobile.InGame.GameManager
         Add_Player,
         Leave_Player,
         Update_PlayerData,
+        Get_AllPlayerData,
 
         // Contine Player Sort.
         Update_Wave,
@@ -127,6 +128,7 @@ namespace Coup_Mobile.InGame.GameManager
                     case PlayerManager_List.Get_NextPlayerSort: ReturnData = next_PlayerTurn; break;
                     case PlayerManager_List.Get_FirstPlayerSort: ReturnData = current_PlayerTurn; break;
                     case PlayerManager_List.Get_PreviousPlayerSort: ReturnData = previous_PlayerTurn; break;
+                    case PlayerManager_List.Get_AllPlayerData: ReturnData = allPlayerSort; break;
                     case PlayerManager_List.Get_Install_Complate: ReturnData = install_Complate; break;
                     default: Debug.LogError($"PlayerManager No PM_List {PM_List}");
                         break;
@@ -404,10 +406,6 @@ namespace Coup_Mobile.InGame.GameManager
 
         #endregion
 
-        public static bool GetStatus_InstallComplate
-        {
-            get => install_Complate;
-        }
     }
 
     [Serializable]

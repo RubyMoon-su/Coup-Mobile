@@ -9,6 +9,7 @@ public class AbilitySelection_Control : MonoBehaviour
 
     [SerializeField] public HorizontalLayoutGroup HLG;
     [SerializeField] public Transform[] pos;
+    [SerializeField] public Button[] button_pos;
     [SerializeField] public int old_CurrentItem;
     [SerializeField] public float sanpForce;
     [HideInInspector] public float snapSpeed;
@@ -32,6 +33,8 @@ public class AbilitySelection_Control : MonoBehaviour
         if (isConnected_UiControl) OnProcess_Scroll();
     }
 
+    #region Local Function
+
     private void OnProcess_Scroll()
     {
         // Find the current step by adding the width of the item and the distance of the Horizontal Layout Group,
@@ -43,6 +46,7 @@ public class AbilitySelection_Control : MonoBehaviour
         {
             old_CurrentItem = CurrentItem;
             ChangeLocalScaleUI(CurrentItem);
+            Interctable_AbilityUI(CurrentItem);
         }
 
         if (CurrentItem > MaxAbilityCount) CurrentItem = MaxAbilityCount;
@@ -97,13 +101,34 @@ public class AbilitySelection_Control : MonoBehaviour
         }
     }
 
-    public void Setting_AbilityScroll(int MaxAbilityCount, int MinAbliltyCount, Transform[] pos)
+    private void Interctable_AbilityUI(int SelectionAbility)
+    {
+        for (int i = 0; i < button_pos.Length; i++)
+        {
+            button_pos[i].interactable = false;
+            
+        }
+
+        if (SelectionAbility >= MinAbliltyCount && SelectionAbility <= MaxAbilityCount)
+        {
+            button_pos[SelectionAbility].interactable = true;
+        }
+    }
+
+    #endregion
+
+    #region Event Control
+
+    public void Setting_AbilityScroll(int MaxAbilityCount, int MinAbliltyCount, Transform[] pos , Button[] button)
     {
         this.MaxAbilityCount = MaxAbilityCount;
         this.MinAbliltyCount = MinAbliltyCount;
 
         this.pos = pos;
+        button_pos = button;
 
         isConnected_UiControl = true;
     }
+
+    #endregion
 }

@@ -4,6 +4,8 @@ using Coup_Mobile.EventBus;
 using System.Collections.Generic;
 using Coup_Mobile.InGame.GameManager.ReportData;
 using Coup_Mobile.InGame.GameManager.Ui;
+using Coup_Mobile.Menu.GameSetting_Data;
+using Coup_Mobile.InGame.UI;
 
 namespace Coup_Mobile.InGame.GameManager
 {
@@ -24,7 +26,7 @@ namespace Coup_Mobile.InGame.GameManager
         public GameManager gameManager { get; private set; }
         private List<UI_Control> ui_Control = new List<UI_Control>();
 
-        public bool install_Complate { get; private set; } = false;
+        public bool install_Complate = false;
 
         public GameUiManager(GameManager gameManager)
         {
@@ -38,19 +40,22 @@ namespace Coup_Mobile.InGame.GameManager
             try
             {
                 // Get Component MainInterface Button.
-                UI_GameCommand_Control ui_gamecommand_control = new UI_GameCommand_Control(this);
-                //UI_MiniMap_Control ui_minimap_control = new UI_MiniMap_Control(this);
-                //UI_GameChat_Control ui_gamechat_Control = new UI_GameChat_Control(this);
-                //UI_PlayerInfo_Control ui_playerinfo_Control = new UI_PlayerInfo_Control(this);
+                UI_GameCommand_Control ui_GameCommand_control = new UI_GameCommand_Control(this);
+                UI_WaveGame_Control ui_WaveGame_Control = new UI_WaveGame_Control(this);
+                UI_GameTimer_Control ui_GameTimer_Control = new UI_GameTimer_Control(this);
+                UI_MiniMap_Control ui_minimap_control = new UI_MiniMap_Control(this);
+                UI_GameChat_Control ui_gamechat_Control = new UI_GameChat_Control(this);
+                UI_PlayerInfo_Control ui_playerinfo_Control = new UI_PlayerInfo_Control(this);
 
                 ui_Control = new List<UI_Control>
                 {
-                    ui_gamecommand_control,
-                    //ui_minimap_control,
-                    //ui_gamechat_Control,
-                    //ui_playerinfo_Control,
+                    ui_GameCommand_control,
+                    ui_WaveGame_Control,
+                    ui_GameTimer_Control,
+                    ui_minimap_control,
+                    ui_gamechat_Control,
+                    ui_playerinfo_Control,
                 };
-
                 install_Complate = true;
 
             }
@@ -100,8 +105,10 @@ namespace Coup_Mobile.InGame.GameManager
                     {
                         requestCommand_Reult = true,
                         requestType = EndPoint,
-                        return_Data = Return_GameUI,
+                        return_Data = Packet_Data,
                     };
+
+                    return Return_GameUI;
                 }
             }
 

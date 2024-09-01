@@ -3,6 +3,7 @@ using Photon.Pun;
 using UnityEngine;
 using Coup_Mobile.EventBus;
 using Coup_Mobile.InGame.GameManager.ReportData;
+using Photon.Realtime;
 
 namespace Coup_Mobile.InGame.GameManager
 {
@@ -10,28 +11,29 @@ namespace Coup_Mobile.InGame.GameManager
     {
         CheckAllPlayer_State,
         Player_SendCommand_Update,
+        ShareResourceSetting,
 
         GetInstall_Complate,
 
     }
-    public class GameNetworkManager : IPunObservable
+    public class GameNetworkManager : MonoBehaviourPun , IPunObservable
     {
         private GameManager gameManager;
         private PhotonView rpc_Control;
         private bool install_Complate;
-
+/*
         public GameNetworkManager(GameManager gameManager)
         {
             this.gameManager = gameManager;
 
             Install_System();
         }
-
-        private void Install_System()
+*/
+        public void Install_System()
         {
             try
             {
-                gameManager.gameObject.TryGetComponent<PhotonView>(out rpc_Control);
+                gameObject.TryGetComponent<PhotonView>(out rpc_Control);
 
                 if (rpc_Control != null)
                 {
@@ -56,27 +58,33 @@ namespace Coup_Mobile.InGame.GameManager
                 if (Request_Data.EndPoint is GameNetworkManager_List GNM_List)
                 {
                     EndPoint = GNM_List;
+                    var NetworkPacket = Request_Data.PacketData as GameNetwork_Requestment?;
 
-                    switch (EndPoint)
+                    if (!NetworkPacket.HasValue)
                     {
-                        case GameNetworkManager_List.CheckAllPlayer_State:
+                        Debug.LogError("Please Request Game Network With 'Game Network Requestment' Data Type.");
+                        Return_GameNetwork.QuicklyReturn_False(EndPoint);
 
-                            rpc_Control.RPC("CheckAllPlayer_State", RpcTarget.All);
-
-                            break;
-                        case GameNetworkManager_List.Player_SendCommand_Update:
-
-                            rpc_Control.RPC("UpdateRequest_Command", RpcTarget.All);
-
-                            break;
-                        case GameNetworkManager_List.GetInstall_Complate:
-
-                            Return_Packet = install_Complate;
-
-                            break;
-
+                        return Return_GameNetwork;
                     }
 
+                    // Send Network Event Option.
+                    Player SelectionPlayer = NetworkPacket.Value.playerSelection;
+                    RpcTarget TargetOption = NetworkPacket.Value.target_Option;
+                    string packetData_Json = NetworkPacket.Value.packetData;
+
+                    // Send event with selection one player.
+                    if (SelectionPlayer != null)
+                    {
+                       Return_Packet = Requestment_With_TargetSelection(GNM_List , SelectionPlayer , packetData_Json);
+                    }
+                    // Send event With rpc option.
+                    else 
+                    {
+                        Return_Packet = Requestment_With_RPCOption(GNM_List , TargetOption , packetData_Json);
+                    }
+
+                    // if requestment have data return , system will return anything data back to owner requestment.
                     if (Return_Packet != null)
                     {
                         Return_GameNetwork = new GameNetworkManager_Return
@@ -89,8 +97,20 @@ namespace Coup_Mobile.InGame.GameManager
                         return Return_GameNetwork;
 
                     }
+                    else 
+                    {
+                        Return_GameNetwork = new GameNetworkManager_Return
+                        {
+                            return_Data = null,
+                            requestType = EndPoint,
+                            requestCommand_Reult = true,
+                        };
+
+                        return Return_GameNetwork;
+                    }
                 }
 
+                // This step in the system does not return anything to the owner’s request, but the system will return a 'process successfully completed' status.
                 Return_GameNetwork.QuicklyReturn_False(EndPoint);
 
                 return Return_GameNetwork;
@@ -102,18 +122,85 @@ namespace Coup_Mobile.InGame.GameManager
             }
         }
 
+        private object Requestment_With_RPCOption(GameNetworkManager_List endPoint , RpcTarget rpc_Option , string packetData_Json)
+        {
+            switch (endPoint)
+            {
+                case GameNetworkManager_List.CheckAllPlayer_State:
+
+                    rpc_Control.RPC("CheckAllPlayer_State", rpc_Option , packetData_Json);
+
+                    break;
+                case GameNetworkManager_List.Player_SendCommand_Update:
+
+                    rpc_Control.RPC("UpdateRequest_Command", rpc_Option );
+
+                    break;
+                case GameNetworkManager_List.ShareResourceSetting:
+
+                    rpc_Control.RPC("ShareResourceSetting", rpc_Option , packetData_Json);
+
+                    break;
+                case GameNetworkManager_List.GetInstall_Complate:
+
+                    return install_Complate;
+            }
+
+            return null;
+        }
+
+        private object Requestment_With_TargetSelection(GameNetworkManager_List endPoint , Player selectionPlayer , string packetData_Json)
+        {
+            switch (endPoint)
+            {
+                case GameNetworkManager_List.CheckAllPlayer_State:
+
+                    rpc_Control.RPC("CheckAllPlayer_State", selectionPlayer , packetData_Json);
+
+                    break;
+                case GameNetworkManager_List.Player_SendCommand_Update:
+
+                    rpc_Control.RPC("UpdateRequest_Command", selectionPlayer );
+
+                    break;
+                case GameNetworkManager_List.ShareResourceSetting:
+
+                    rpc_Control.RPC("ShareResourceSetting", selectionPlayer , packetData_Json);
+
+                    break;
+                case GameNetworkManager_List.GetInstall_Complate:
+
+                    return install_Complate;
+            }
+
+            return null;
+        }
+
         #region Local Network Function
 
         [PunRPC]
-        public bool CheckAllPlayer_State()
+        public void CheckAllPlayer_State()
         {
-            return true;
+           
         }
 
         [PunRPC]
-        private bool UpdateRequest_Command()
+        private void UpdateRequest_Command()
         {
-            return true;
+            
+        }
+
+        [PunRPC]
+        public void ShareResourceSetting(string StarterSetting_Json)
+        {
+            GameManager_Data ShareResourcet_Event = new GameManager_Data
+            {
+                gameManager_Event = GameManager_Event.GameStateManager,
+                EndPoint = GameStateManager_List.UpdateStateNetwork,
+                PacketData = StarterSetting_Json,
+            };
+
+            EventBus_InGameManager<IInGameEvent>.RaiseGameCommand(ShareResourcet_Event);
         }
 
 
@@ -145,6 +232,22 @@ namespace Coup_Mobile.InGame.GameManager
             requestCommand_Reult = false;
             requestType = Type;
             return_Data = null;
+        }
+    }
+
+    [Serializable]
+    public struct GameNetwork_Requestment
+    {
+        public Player playerSelection;
+        public RpcTarget target_Option;
+
+        public string packetData;
+
+        public void SettingDataToDefault()
+        {
+            playerSelection = null;
+            target_Option = RpcTarget.All;
+            packetData = null;
         }
     }
 }

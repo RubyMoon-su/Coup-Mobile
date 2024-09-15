@@ -6,6 +6,7 @@ using System.Collections;
 using Coup_Mobile.EventBus;
 using Coup_Mobile.Menu.GameSetting_Data;
 using Coup_Mobile.InGame.GameManager.ReportData;
+using System.Threading.Tasks;
 
 
 namespace Coup_Mobile.InGame.GameManager
@@ -50,6 +51,8 @@ namespace Coup_Mobile.InGame.GameManager
 
         [SerializeField] public static readonly int SYSTEM_TIMEOUT = 10;
         [SerializeField] public static readonly int NETWORK_TIMEOUT = 10;
+
+        [SerializeField] public static bool isOnline = true;
 
         public void Start()
         {
@@ -197,7 +200,7 @@ namespace Coup_Mobile.InGame.GameManager
 
             gameAssistManager = new GameAssistManager(this);
             playerManager = new PlayerManager(this, gameSetting);
-            gameStateManager = new GameStateManager(this);
+            gameStateManager = new GameStateManager(this , gameSetting);
             gameResourceManager = new GameResourceManager(this, gameSetting);
             gameNetworkManager = GetComponent<GameNetworkManager>();
             gameNetworkManager.Install_System();

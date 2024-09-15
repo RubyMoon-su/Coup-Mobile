@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Coup_Mobile.InGame.GameManager.GameState;
 using Coup_Mobile.InGame.GameManager.ReportData;
+using Coup_Mobile.InGame.PlayerData;
+using Coup_Mobile.Menu.GameSetting_Data;
 
 
 namespace Coup_Mobile.InGame.GameManager
@@ -75,6 +77,7 @@ namespace Coup_Mobile.InGame.GameManager
 
     public class GameStateManager : IOtherPlayerResponsive_Subject
     {
+
         #region GameState Template
         private readonly List<GameState_List> StarterState = new List<GameState_List>()
         {
@@ -113,6 +116,8 @@ namespace Coup_Mobile.InGame.GameManager
 
         #endregion
 
+        #region Universal Variable Global Field
+
         // Ref Component.
         private GameManager gameManager;
 
@@ -128,21 +133,35 @@ namespace Coup_Mobile.InGame.GameManager
         private bool isGameStateStop = false;
         private bool install_Complate = false;
 
+        #endregion
+
+        #region Online Variable Global Field
+
+
+
+        #endregion
+
+        #region Offline Variabel Global Field
+
+
+
+        #endregion
+
         #region Install State Function
 
-        public GameStateManager(GameManager gameManager)
+        public GameStateManager(GameManager gameManager , GameSetting gameSetting)
         {
             Debug.Log("GameStateManager Created.");
 
             this.gameManager = gameManager;
 
-            _ = Install_System();
+            _ = Install_System(gameSetting);
         }
 
-        private async Task Install_System()
+        private async Task Install_System(GameSetting gameMode)
         {
             // Setup GameState List.
-            bool Setup_StarterState = await Process_StarterState(GameMode.NormalGame);
+            bool Setup_StarterState = await Process_StarterState(gameMode.gameMode);
 
             int Timer = 0;
             int SystemTimeOut = GameManager.SYSTEM_TIMEOUT;
@@ -162,7 +181,7 @@ namespace Coup_Mobile.InGame.GameManager
 
             Timer = 0;
 
-            bool Setup_GameState = await Process_GameState(GameMode.NormalGame);
+            bool Setup_GameState = await Process_GameState(gameMode.gameMode);
 
             while (!Setup_GameState)
             {
@@ -292,7 +311,7 @@ namespace Coup_Mobile.InGame.GameManager
             }
         }
 
-        private async Task<bool> Process_StarterState(GameMode gamemode , object CustormMode = null)
+        private async Task<bool> Process_StarterState(GameMode gamemode, object CustormMode = null)
         {
             List<GameState_List> StarterState = new List<GameState_List>();
 
@@ -438,7 +457,9 @@ namespace Coup_Mobile.InGame.GameManager
 
                 if (isGameStateStop || !ProcessResult(Result, State)) return;
 
-                Debug.Log("Next State");
+                Debug.Log("Next State = " + State_Selection);
+
+                await Task.Delay(2000);
             }
 
             if (isGameStateStop) return;
@@ -595,7 +616,7 @@ namespace Coup_Mobile.InGame.GameManager
 
         public void Notify(object PacketData)
         {
-            foreach(var Registered in registered_Notify)
+            foreach (var Registered in registered_Notify)
             {
                 Registered.UpdateFormNetwork(PacketData);
             }

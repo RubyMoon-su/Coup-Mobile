@@ -16,6 +16,7 @@ namespace Coup_Mobile.InGame.GameManager
         Leave_Player,
         Update_PlayerData,
         Get_AllPlayerData,
+        Get_SelectionPlayerData,
 
         // Contine Player Sort.
         Update_Wave,
@@ -38,6 +39,9 @@ namespace Coup_Mobile.InGame.GameManager
 
     public class PlayerManager
     {
+
+        #region Universal Variable Global Field
+
         // Player In Game Collection.
         // Process Wave With Numeric.
         private readonly List<Player_Data> allPlayer_InGame = new List<Player_Data>();
@@ -53,6 +57,22 @@ namespace Coup_Mobile.InGame.GameManager
 
         // Player Manager Control Process Successful Status.
         private static bool install_Complate = false;
+
+        #endregion
+
+        #region Online Variable Global Field
+
+
+
+        #endregion
+
+        #region Offline Variabel Global Field
+
+
+
+        #endregion
+
+
 
         public PlayerManager(GameManager gameManager, GameSetting gameSetting)
         {
@@ -95,9 +115,9 @@ namespace Coup_Mobile.InGame.GameManager
 
                         if (Request_Data.PacketData is Player_Data UpdatePlayer)
                         {
-                           bool UpdatePlayer_Result = Update_PlayerData(UpdatePlayer);
+                            bool UpdatePlayer_Result = Update_PlayerData(UpdatePlayer);
 
-                           ReturnData = UpdatePlayer_Result;
+                            ReturnData = UpdatePlayer_Result;
                         }
 
                         break;
@@ -129,8 +149,26 @@ namespace Coup_Mobile.InGame.GameManager
                     case PlayerManager_List.Get_FirstPlayerSort: ReturnData = current_PlayerTurn; break;
                     case PlayerManager_List.Get_PreviousPlayerSort: ReturnData = previous_PlayerTurn; break;
                     case PlayerManager_List.Get_AllPlayerData: ReturnData = allPlayerSort; break;
+                    case PlayerManager_List.Get_SelectionPlayerData:
+
+                        if (Request_Data.PacketData != null && Request_Data.PacketData is not string)
+                        {
+                            Debug.LogError($"{PM_List} PacketData is {Request_Data.PacketData} || PacketData is not String{Request_Data.PacketData is not string}");
+                            break;
+                        }
+                        
+                        foreach (var PlayerCard in allPlayerSort)
+                        {                         
+                            if (PlayerCard.Value.playerName == (string)Request_Data.PacketData)
+                            {
+                                ReturnData = PlayerCard.Value;
+                            }
+                        }
+
+                        break;
                     case PlayerManager_List.Get_Install_Complate: ReturnData = install_Complate; break;
-                    default: Debug.LogError($"PlayerManager No PM_List {PM_List}");
+                    default:
+                        Debug.LogError($"PlayerManager No PM_List {PM_List}");
                         break;
                 }
             }
@@ -399,7 +437,7 @@ namespace Coup_Mobile.InGame.GameManager
             }
             catch (Exception ex)
             {
-                 Debug.LogError("PlayerManager Exception Message 'Update_PlayerData' " + ex);
+                Debug.LogError("PlayerManager Exception Message 'Update_PlayerData' " + ex);
                 return false;
             }
         }

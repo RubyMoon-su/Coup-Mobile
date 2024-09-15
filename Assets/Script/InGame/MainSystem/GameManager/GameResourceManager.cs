@@ -94,7 +94,7 @@ namespace Coup_Mobile.InGame.GameManager
 
     public class GameResourceManager
     {
-        #region Income And Cost Field
+        #region Universal Variable Global Field
 
         // How Much Character Can Play.
         private Dictionary<string /*Character Name*/, int /*Amount Character*/> allCharacter = new Dictionary<string, int>();
@@ -103,10 +103,7 @@ namespace Coup_Mobile.InGame.GameManager
         private List<Tuple<string /*Action Name*/, int /*Income Ability*/ , int /*Cost Ability*/>> costAndAction = new List<Tuple<string, int, int>>();
 
         private List<string> allCharacter_InCenter = new List<string>();
-
-        #endregion
-
-        #region Coin And Character Anoumt
+        private List<string> enable_Ability = new List<string>();
 
         // Total Card And Coin In Game.
         private int allCoinCenter;
@@ -117,10 +114,6 @@ namespace Coup_Mobile.InGame.GameManager
         private int coinStarter;
         private int cardStarter;
 
-        #endregion
-
-        #region Time Resource
-
         private int waitCommandTime;
         private int waitCounterTime;
         private int waitVerifyTime;
@@ -130,15 +123,25 @@ namespace Coup_Mobile.InGame.GameManager
         private int waitEmbezzlementTime;
         private int waitBettwenStateTime;
 
-        #endregion
-
         private GameManager gameManager;
         private GameSetting gameSetting;
 
         public static bool Install_Complate = false;
-        private List<string> enable_Ability = new List<string>();
 
 
+        #endregion
+
+        #region Online Variable Global Field
+
+
+
+        #endregion
+
+        #region Offline Variabel Global Field
+
+
+
+        #endregion
 
         public GameResourceManager(GameManager gameManager, GameSetting gameSetting)
         {
@@ -149,7 +152,7 @@ namespace Coup_Mobile.InGame.GameManager
             this.gameSetting = gameSetting;
 
             // Install Resource.
-            InstallResource(gameSetting);
+            InstallResource(this.gameSetting);
         }
 
         private async void InstallResource(GameSetting gameSetting)
@@ -171,6 +174,7 @@ namespace Coup_Mobile.InGame.GameManager
                     {"Assassin" , 0},
                     {"Ambassdor" , 0},
                     {"Contessa" , 0},
+                    {"inquisitor" , 0}
                 };
 
                 await Task.Delay(0);
@@ -194,6 +198,8 @@ namespace Coup_Mobile.InGame.GameManager
 
                 Debug.LogError(ex);
             }
+
+
         }
 
         #region Game Resource Control.

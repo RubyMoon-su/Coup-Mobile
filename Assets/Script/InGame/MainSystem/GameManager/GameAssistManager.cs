@@ -20,14 +20,22 @@ namespace Coup_Mobile.InGame.GameManager
 
         // Game Command Ui Assist.
         private GameObject abilityUI_Prefab;
-
         private Transform abilityUI_Content;
         private Transform abilityUI_Control;
-
         private Transform abilityUI_ToggleButton;
 
-        // Game PlayerInfo Ui Assist.
+        // Game MiniMap UI Assist.
+        private Transform miniMapInfo_OverViewButton;
+        private Transform miniMapInfo_OptionButton;
+        private Transform miniMapInfo_ViewPort;
 
+        // Game PlayerInfo Ui Assist.
+        private Transform playerInfo_LogoImage;
+        private Transform playerInfo_CardAnountText;
+        private Transform playerInfo_CoinAnountText;
+        private Transform playerInfo_CardInfoButton;
+        private Transform playerInfo_CenterOfCardDisplay;
+        private Transform playerInfo_CardContentGameObject;
 
         // Game TimerInfo Ui Assist.
         private Transform timerDisplay_Instance;
@@ -76,9 +84,7 @@ namespace Coup_Mobile.InGame.GameManager
             Transform CommandInfo_Path = GameObject.Find("InGane_Canvas/Ui_Interface/CommandInfo").transform; ;
 
             abilityUI_Content = CommandInfo_Path.Find($"Scroll View/Viewport/Content");
-
             abilityUI_Control = CommandInfo_Path.Find($"Scroll View");
-
             abilityUI_ToggleButton = CommandInfo_Path.Find("Command_Button");
         }
 
@@ -94,12 +100,29 @@ namespace Coup_Mobile.InGame.GameManager
             Transform StateInfo_Path = GameObject.Find("InGane_Canvas/Ui_Interface/StateInfo").transform;
 
             stateDisplay_Instance = StateInfo_Path;
-
             statePosition_Path = StateInfo_Path.Find("StateDisplay/Position").transform;
-
             stateObject_Path = StateInfo_Path.Find("StateDisplay/StateObject").transform;
-
             stateBackGround_Path = StateInfo_Path.Find("StateDisplay/StateObject").transform;
+        }
+
+        private void Load_MiniMap_DisPlayControl_Assist()
+        {
+            Transform MiniMap_Path = GameObject.Find("InGane_Canvas/Ui_Interface/MiniMap").transform;
+
+            miniMapInfo_ViewPort = MiniMap_Path.Find("Map");
+            miniMapInfo_OptionButton = MiniMap_Path.Find("Option");
+            miniMapInfo_OverViewButton = MiniMap_Path.Find("PlayerInfo");
+        }
+
+        private void Load_PlayerInfoDisplay_Assist()
+        {
+            Transform PlayerInfo_Path = GameObject.Find("InGane_Canvas/Ui_Interface/PlayerInfo").transform;
+
+            playerInfo_LogoImage = PlayerInfo_Path.Find("Character_Image");
+            playerInfo_CardAnountText = PlayerInfo_Path.Find("CardAnount");
+            playerInfo_CoinAnountText = PlayerInfo_Path.Find("CoinAnount");
+            playerInfo_CardInfoButton = PlayerInfo_Path.Find("CardInfoButton");
+            playerInfo_CenterOfCardDisplay = PlayerInfo_Path.Find("Card_Display/CenterPos");
         }
 
         public GameAssistManager_Return GameAssistManager_Control(GameManager_Data Request_Data)

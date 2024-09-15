@@ -1,6 +1,8 @@
 using Photon.Pun;
+using UnityEngine;
 using System.Threading.Tasks;
 using Coup_Mobile.InGame.GameManager.ReportData;
+using ExitGames.Client.Photon;
 
 namespace Coup_Mobile.InGame.GameManager.GameState
 {
@@ -8,46 +10,50 @@ namespace Coup_Mobile.InGame.GameManager.GameState
     {
         public Process_PlayerSort_GameState(GameStateManager gameStateManager) : base(gameStateManager)
         {
-            UnityEngine.Debug.Log($"{this.GetType().Name} Created.");
+            Debug.Log($"{this.GetType().Name} Created.");
         }
 
         public async Task<object> ProcessGameState(object PacketData)
         {
-            if (PacketData is GameManager_Data GM_Data)
+            try
             {
-                try
+                bool isOnline = GameManager.isOnline;
+
+                if (isOnline)
                 {
-                    if (PhotonNetwork.IsMasterClient)
-                    {
-                        for (int i = 0; i < 10; i++)
-                        {
-                            UnityEngine.Debug.Log($"Process_PlayerSort Count {i}");
-
-                            await Task.Delay(1000);
-                        }
-
-                        UnityEngine.Debug.Log("Loop Complate");
-
-                        await Task.Delay(5000);
-
-
-                        return new GameState_Report(GameState_List.Setup_Player_Properties, null, true, null);
-                    }
-                    else
-                    {
-                        while (true)
-                        {
-
-                        }
-                    }
+                    await OnProcess_Online();
                 }
-                catch (System.Exception ex)
+                else
                 {
-                    return new GameState_Report(GameState_List.Setup_Player_Properties, null, false, ex.Message);
+                    await OnProcess_Offline();
                 }
+
+                await Task.Delay(0);
+
+                return new GameState_Report(GameState_List.Setup_Player_Properties, null, false, "Only Test Process PlayerSlot.");
+            }
+            catch (System.Exception ex)
+            {
+                return new GameState_Report(GameState_List.Setup_Player_Properties, null, false, ex.Message);
             }
 
-            return new GameState_Report(GameState_List.Setup_Player_Properties, null, false, "DataType Incorrect.");
         }
+
+        #region Game Network Optional
+
+        private async Task<bool> OnProcess_Online()
+        {
+            await Task.Delay(0);
+
+            return true;
+        }
+
+        private async Task<bool> OnProcess_Offline()
+        {
+            await Task.Delay(0);
+            return true;
+        }
+
+        #endregion
     }
 }

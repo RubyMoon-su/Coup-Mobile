@@ -4,6 +4,7 @@ using UnityEngine;
 using Coup_Mobile.EventBus;
 using Coup_Mobile.InGame.GameManager.ReportData;
 using Photon.Realtime;
+using System.Threading.Tasks;
 
 namespace Coup_Mobile.InGame.GameManager
 {
@@ -16,19 +17,27 @@ namespace Coup_Mobile.InGame.GameManager
         GetInstall_Complate,
 
     }
-    public class GameNetworkManager : MonoBehaviourPun , IPunObservable
+    public class GameNetworkManager : MonoBehaviourPun, IPunObservable
     {
-        private GameManager gameManager;
-        private PhotonView rpc_Control;
-        private bool install_Complate;
-/*
-        public GameNetworkManager(GameManager gameManager)
-        {
-            this.gameManager = gameManager;
+        #region Universal Variable Global Field
 
-            Install_System();
-        }
-*/
+        private GameManager gameManager;
+        private bool install_Complate;
+
+        #endregion
+
+        #region Online Variable Global Field
+
+        private PhotonView rpc_Control;
+
+        #endregion
+
+        #region Offline Variabel Global Field
+
+
+
+        #endregion
+
         public void Install_System()
         {
             try
@@ -49,8 +58,29 @@ namespace Coup_Mobile.InGame.GameManager
 
         public GameNetworkManager_Return GameNetworkManager_Control(GameManager_Data Request_Data)
         {
+            bool isOnline = GameManager.isOnline;
+            GameNetworkManager_Return Return_Packet = new GameNetworkManager_Return();
+
+            if (isOnline)
+            {
+                Return_Packet = ProcessWithOnlineMode(Request_Data);
+            }
+            else
+            {
+                Return_Packet = ProcessWithOfflineMode(Request_Data);
+            }
+
+            return Return_Packet;
+
+        }
+
+        #region Game Network Optional
+
+        private GameNetworkManager_Return ProcessWithOnlineMode(GameManager_Data Request_Data)
+        {
             GameNetworkManager_Return Return_GameNetwork = new GameNetworkManager_Return();
             object Return_Packet = null;
+
             try
             {
                 GameNetworkManager_List EndPoint = default;
@@ -76,12 +106,12 @@ namespace Coup_Mobile.InGame.GameManager
                     // Send event with selection one player.
                     if (SelectionPlayer != null)
                     {
-                       Return_Packet = Requestment_With_TargetSelection(GNM_List , SelectionPlayer , packetData_Json);
+                        Return_Packet = Requestment_With_TargetSelection(GNM_List, SelectionPlayer, packetData_Json);
                     }
                     // Send event With rpc option.
-                    else 
+                    else
                     {
-                        Return_Packet = Requestment_With_RPCOption(GNM_List , TargetOption , packetData_Json);
+                        Return_Packet = Requestment_With_RPCOption(GNM_List, TargetOption, packetData_Json);
                     }
 
                     // if requestment have data return , system will return anything data back to owner requestment.
@@ -97,7 +127,7 @@ namespace Coup_Mobile.InGame.GameManager
                         return Return_GameNetwork;
 
                     }
-                    else 
+                    else
                     {
                         Return_GameNetwork = new GameNetworkManager_Return
                         {
@@ -122,23 +152,32 @@ namespace Coup_Mobile.InGame.GameManager
             }
         }
 
-        private object Requestment_With_RPCOption(GameNetworkManager_List endPoint , RpcTarget rpc_Option , string packetData_Json)
+        private GameNetworkManager_Return ProcessWithOfflineMode(GameManager_Data Request_Data)
+        {
+            // this Function doesn't have a processing.
+
+            return new GameNetworkManager_Return();
+        }
+
+        #endregion
+
+        private object Requestment_With_RPCOption(GameNetworkManager_List endPoint, RpcTarget rpc_Option, string packetData_Json)
         {
             switch (endPoint)
             {
                 case GameNetworkManager_List.CheckAllPlayer_State:
 
-                    rpc_Control.RPC("CheckAllPlayer_State", rpc_Option , packetData_Json);
+                    rpc_Control.RPC("CheckAllPlayer_State", rpc_Option, packetData_Json);
 
                     break;
                 case GameNetworkManager_List.Player_SendCommand_Update:
 
-                    rpc_Control.RPC("UpdateRequest_Command", rpc_Option );
+                    rpc_Control.RPC("UpdateRequest_Command", rpc_Option);
 
                     break;
                 case GameNetworkManager_List.ShareResourceSetting:
 
-                    rpc_Control.RPC("ShareResourceSetting", rpc_Option , packetData_Json);
+                    rpc_Control.RPC("ShareResourceSetting", rpc_Option, packetData_Json);
 
                     break;
                 case GameNetworkManager_List.GetInstall_Complate:
@@ -149,23 +188,23 @@ namespace Coup_Mobile.InGame.GameManager
             return null;
         }
 
-        private object Requestment_With_TargetSelection(GameNetworkManager_List endPoint , Player selectionPlayer , string packetData_Json)
+        private object Requestment_With_TargetSelection(GameNetworkManager_List endPoint, Player selectionPlayer, string packetData_Json)
         {
             switch (endPoint)
             {
                 case GameNetworkManager_List.CheckAllPlayer_State:
 
-                    rpc_Control.RPC("CheckAllPlayer_State", selectionPlayer , packetData_Json);
+                    rpc_Control.RPC("CheckAllPlayer_State", selectionPlayer, packetData_Json);
 
                     break;
                 case GameNetworkManager_List.Player_SendCommand_Update:
 
-                    rpc_Control.RPC("UpdateRequest_Command", selectionPlayer );
+                    rpc_Control.RPC("UpdateRequest_Command", selectionPlayer);
 
                     break;
                 case GameNetworkManager_List.ShareResourceSetting:
 
-                    rpc_Control.RPC("ShareResourceSetting", selectionPlayer , packetData_Json);
+                    rpc_Control.RPC("ShareResourceSetting", selectionPlayer, packetData_Json);
 
                     break;
                 case GameNetworkManager_List.GetInstall_Complate:
@@ -181,13 +220,13 @@ namespace Coup_Mobile.InGame.GameManager
         [PunRPC]
         public void CheckAllPlayer_State()
         {
-           
+
         }
 
         [PunRPC]
         private void UpdateRequest_Command()
         {
-            
+
         }
 
         [PunRPC]

@@ -45,7 +45,7 @@ public class CameraControl : MonoBehaviour
                     Vector3 GlobalDirection = transform.TransformDirection(Direction);
                     float movespeed = 0.1f;
                     Vector3 NewMove = new Vector3(GlobalDirection.x * movespeed , 0 , GlobalDirection.y * movespeed);
-                    Debug.Log(NewMove);
+                    //Debug.Log(NewMove);
 
                     cc.Move(NewMove);
 

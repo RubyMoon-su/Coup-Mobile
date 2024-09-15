@@ -42,7 +42,7 @@ public class NetworkTest : MonoBehaviourPunCallbacks
         {
             Debug.LogError("OnJoin");
             int Time = 0;
-            int max = 30;
+            int max = 60;
 
             while (!OnStart)
             {
@@ -50,7 +50,7 @@ public class NetworkTest : MonoBehaviourPunCallbacks
 
                 Time++;
 
-                Debug.Log("Wait For Player" + Time);
+                if (Time % 5 == 0)Debug.Log("Wait For Player" + Time);
 
                 if (max <= Time)
                 {

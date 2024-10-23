@@ -2,13 +2,13 @@ using Photon.Pun;
 using UnityEngine;
 using System.Threading.Tasks;
 using Coup_Mobile.InGame.GameManager.ReportData;
-using ExitGames.Client.Photon;
+using UnityEngine.UI;
 
 namespace Coup_Mobile.InGame.GameManager.GameState
 {
-    public class Process_PlayerSort_GameState : GameState, IGameState_Strategy
+    public class Check_PlayerInfo_GameState : GameState, IGameState_Strategy
     {
-        public Process_PlayerSort_GameState(GameStateManager gameStateManager) : base(gameStateManager)
+        public Check_PlayerInfo_GameState(GameStateManager gameStateManager) : base(gameStateManager)
         {
             Debug.Log($"{this.GetType().Name} Created.");
         }
@@ -55,5 +55,7 @@ namespace Coup_Mobile.InGame.GameManager.GameState
         }
 
         #endregion
+
+       
     }
 }

@@ -26,6 +26,10 @@ namespace Coup_Mobile.EventBus.ConvertType
             {
                 return gameStateManager.return_Data;
             }
+            else if (TypeConvert is PlayerManager_Return gamePlayerManager)
+            {
+                return gamePlayerManager.return_Data;
+            }
             else 
             {
                 UnityEngine.Debug.LogError($"'{TypeConvert.GetType().Name}' is Not Support to convert This Type Result.");

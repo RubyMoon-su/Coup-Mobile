@@ -221,7 +221,7 @@ namespace Coup_Mobile.InGame.GameManager
                 // Starter GameState.
                 starter_GameStateColleciton.Add(GameState_List.Check_Component_And_GameEvent, new InitializationChecker_GameState(this));
                 starter_GameStateColleciton.Add(GameState_List.Setup_Player_Properties, new SetupPlayerProperties_GameState(this));
-                starter_GameStateColleciton.Add(GameState_List.Process_Player_Sort, new Process_PlayerSort_GameState(this));
+                starter_GameStateColleciton.Add(GameState_List.Process_Player_Sort, new Check_PlayerInfo_GameState(this));
                 starter_GameStateColleciton.Add(GameState_List.Player_Select_Team, new SetUp_PlayerTeam_GameState(this));
             }
             catch (Exception ex)

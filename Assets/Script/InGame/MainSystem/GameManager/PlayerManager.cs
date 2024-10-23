@@ -16,6 +16,7 @@ namespace Coup_Mobile.InGame.GameManager
         Leave_Player,
         Update_PlayerData,
         Get_AllPlayerData,
+        Get_AllPlayerWithout_MineData,
         Get_SelectionPlayerData,
 
         // Contine Player Sort.
@@ -46,6 +47,7 @@ namespace Coup_Mobile.InGame.GameManager
         // Process Wave With Numeric.
         private readonly List<Player_Data> allPlayer_InGame = new List<Player_Data>();
         private readonly Dictionary<int, Player_Data> allPlayerSort = new Dictionary<int, Player_Data>();
+        private Player_Data myPlayer_Data;
 
         // Player Position In Game Wave.
         private Player_Data current_PlayerTurn;
@@ -149,6 +151,12 @@ namespace Coup_Mobile.InGame.GameManager
                     case PlayerManager_List.Get_FirstPlayerSort: ReturnData = current_PlayerTurn; break;
                     case PlayerManager_List.Get_PreviousPlayerSort: ReturnData = previous_PlayerTurn; break;
                     case PlayerManager_List.Get_AllPlayerData: ReturnData = allPlayerSort; break;
+                    case PlayerManager_List.Get_AllPlayerWithout_MineData:
+                        foreach (var playerName in allPlayerSort.Values.ToList())
+                        {
+
+                        }
+                        break;
                     case PlayerManager_List.Get_SelectionPlayerData:
 
                         if (Request_Data.PacketData != null && Request_Data.PacketData is not string)
@@ -156,9 +164,9 @@ namespace Coup_Mobile.InGame.GameManager
                             Debug.LogError($"{PM_List} PacketData is {Request_Data.PacketData} || PacketData is not String{Request_Data.PacketData is not string}");
                             break;
                         }
-                        
+
                         foreach (var PlayerCard in allPlayerSort)
-                        {                         
+                        {
                             if (PlayerCard.Value.playerName == (string)Request_Data.PacketData)
                             {
                                 ReturnData = PlayerCard.Value;

@@ -1,22 +1,23 @@
 using System;
 using UnityEngine;
 using Coup_Mobile.EventBus;
-using System.Collections.Generic;
-using Coup_Mobile.InGame.GameManager.ReportData;
-using Coup_Mobile.InGame.GameManager.Ui;
-using Coup_Mobile.Menu.GameSetting_Data;
 using Coup_Mobile.InGame.UI;
+using System.Collections.Generic;
+using Coup_Mobile.InGame.GameManager.Ui;
+using Coup_Mobile.InGame.GameManager.ReportData;
 
 namespace Coup_Mobile.InGame.GameManager
 {
     public enum GameUIManager_List
     {
+        None,
         Game_Command_UI,
         Game_MiniMap_UI,
         Game_PlayerInfo_UI,
         Game_WaveInfo_UI,
         Game_Chat_UI,
         Game_WaveControl_UI,
+        Game_TimeControl_Ui,
 
         GetInstall_Complate,
     }
@@ -24,7 +25,7 @@ namespace Coup_Mobile.InGame.GameManager
     public class GameUiManager
     {
         public GameManager gameManager { get; private set; }
-        private List<UI_Control> ui_Control = new List<UI_Control>();
+        private Dictionary<GameUIManager_List, IGameUi_Controller> ui_Control;
 
         public bool install_Complate = false;
 
@@ -40,21 +41,21 @@ namespace Coup_Mobile.InGame.GameManager
             try
             {
                 // Get Component MainInterface Button.
-                UI_GameCommand_Control ui_GameCommand_control = new UI_GameCommand_Control(this);
-                UI_WaveGame_Control ui_WaveGame_Control = new UI_WaveGame_Control(this);
-                UI_GameTimer_Control ui_GameTimer_Control = new UI_GameTimer_Control(this);
-                UI_MiniMap_Control ui_minimap_control = new UI_MiniMap_Control(this);
-                UI_GameChat_Control ui_gamechat_Control = new UI_GameChat_Control(this);
-                UI_PlayerInfo_Control ui_playerinfo_Control = new UI_PlayerInfo_Control(this);
+                IGameUi_Controller ui_GameCommand_control = new UI_GameCommand_Control(this);
+                IGameUi_Controller ui_WaveGame_Control = new UI_WaveGame_Control(this);
+                IGameUi_Controller ui_GameTimer_Control = new UI_GameTimer_Control(this);
+                IGameUi_Controller ui_minimap_control = new UI_MiniMap_Control(this);
+                IGameUi_Controller ui_gamechat_Control = new UI_GameChat_Control(this);
+                IGameUi_Controller ui_playerinfo_Control = new UI_PlayerInfo_Control(this);
 
-                ui_Control = new List<UI_Control>
+                ui_Control = new Dictionary<GameUIManager_List, IGameUi_Controller>
                 {
-                    ui_GameCommand_control,
-                    ui_WaveGame_Control,
-                    ui_GameTimer_Control,
-                    ui_minimap_control,
-                    ui_gamechat_Control,
-                    ui_playerinfo_Control,
+                    {GameUIManager_List.Game_Command_UI, ui_GameCommand_control},
+                    {GameUIManager_List.Game_WaveControl_UI , ui_WaveGame_Control},
+                    {GameUIManager_List.Game_TimeControl_Ui , ui_GameTimer_Control},
+                    {GameUIManager_List.Game_MiniMap_UI , ui_minimap_control},
+                    {GameUIManager_List.Game_Chat_UI , ui_gamechat_Control},
+                    {GameUIManager_List.Game_PlayerInfo_UI , ui_playerinfo_Control},
                 };
                 install_Complate = true;
 
@@ -74,45 +75,87 @@ namespace Coup_Mobile.InGame.GameManager
             GameUIManager_Return Return_GameUI = new GameUIManager_Return();
             object Packet_Data = null;
 
-            GameUIManager_List EndPoint = default;
+            GameUIManager_List? EndPoint = Request_Data.EndPoint as GameUIManager_List?;
 
-            if (Request_Data.EndPoint is GameUIManager_List GUM_List)
+            if (EndPoint.HasValue)
             {
-                EndPoint = GUM_List;
+                GameUI_RequestData? RequestUI_Header = Request_Data.PacketData as GameUI_RequestData?;
 
-                switch (EndPoint)
+                if (RequestUI_Header.HasValue)
                 {
-                    case GameUIManager_List.Game_Command_UI:
-                        break;
-                    case GameUIManager_List.Game_MiniMap_UI:
-                        break;
-                    case GameUIManager_List.Game_Chat_UI:
-                        break;
-                    case GameUIManager_List.Game_WaveControl_UI:
-                        break;
-                    case GameUIManager_List.Game_WaveInfo_UI:
-                        break;
-                    case GameUIManager_List.Game_PlayerInfo_UI:
-                        break;
-                    case GameUIManager_List.GetInstall_Complate:
-                        Packet_Data = install_Complate;
-                        break;
-                }
+                    var GameUi_Path = EndPoint.Value;
+                    IGameUi_Controller Ui_Controller = null;
 
-                if (Packet_Data != null)
-                {
-                    Return_GameUI = new GameUIManager_Return
+                    foreach (var Ui_Select in ui_Control)
                     {
-                        requestCommand_Reult = true,
-                        requestType = EndPoint,
-                        return_Data = Packet_Data,
-                    };
+                        if (Ui_Select.Key == GameUi_Path)
+                        {
+                            Ui_Controller = Ui_Select.Value;
+                        }
+                    }
 
-                    return Return_GameUI;
+                    if (Ui_Controller == null)
+                    {
+                        Return_GameUI.QuicklyReturn_False(EndPoint.Value, "GameUi Select is null");
+
+                        return Return_GameUI;
+                    }
+
+                    GameUI_ReturnData ReturnPacket_Ui = default;
+                    string Topic = RequestUI_Header.Value.request_Topic[0];
+                    var UIPacket = RequestUI_Header.Value;
+
+                    switch (Topic)
+                    {
+                        case "Request":
+                            ReturnPacket_Ui = Ui_Controller.OnRequest_UI(UIPacket);
+                            break;
+                        case "GetData":
+                            ReturnPacket_Ui = Ui_Controller.OnReturnStatus_UI(UIPacket);
+                            break;
+                        case "Update":
+                            ReturnPacket_Ui = Ui_Controller.OnUpdateData_UI(UIPacket);
+                            break;
+                        case "ToggleActive":
+                            ReturnPacket_Ui = Ui_Controller.OnToggleActive_UI(UIPacket);
+                            break;
+                    }
+
+                    if (ReturnPacket_Ui.Equals(typeof(GameUI_ReturnData)))
+                    {
+                        Return_GameUI.QuicklyReturn_False(EndPoint.Value, "No ReturnData from the Ui Controller.");
+
+                        return Return_GameUI;
+                    }
+                }
+                else
+                {
+                    var GameUi_Path = EndPoint.Value;
+
+                    switch (GameUi_Path)
+                    {
+                        case GameUIManager_List.GetInstall_Complate:
+                            Packet_Data = install_Complate;
+                            break;
+                        default:
+                            Return_GameUI.QuicklyReturn_False(EndPoint.Value, $"{GameUi_Path} is not installed in a System.");
+                            return Return_GameUI;
+                    }
+
+                    if (Packet_Data != null)
+                    {
+                        Return_GameUI = new GameUIManager_Return
+                        {
+                            requestCommand_Reult = true,
+                            requestType = GameUi_Path,
+                            return_Data = Packet_Data,
+                        };
+                        return Return_GameUI;
+                    }
                 }
             }
 
-            Return_GameUI.QuicklyReturn_False(EndPoint);
+            Return_GameUI.QuicklyReturn_False(GameUIManager_List.None , "Requestment has not set the Game Ui path.");
 
             return Return_GameUI;
         }
@@ -123,12 +166,14 @@ namespace Coup_Mobile.InGame.GameManager
         public bool requestCommand_Reult;
         public GameUIManager_List requestType;
         public object return_Data;
+        public string system_message;
 
-        public void QuicklyReturn_False(GameUIManager_List Type)
+        public void QuicklyReturn_False(GameUIManager_List Type, string system_message = null)
         {
             requestCommand_Reult = false;
             requestType = Type;
             return_Data = null;
+            this.system_message = system_message;
         }
     }
 }

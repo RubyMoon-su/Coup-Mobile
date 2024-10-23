@@ -196,7 +196,7 @@ namespace Coup_Mobile.InGame.GameManager.GameState
 
             while (!Check_GameStateManager_Status)
             {
-                GameStateManager_Return GSM_Result = (GameStateManager_Return)Request_Event(EventPath, EndPoint, null);
+                GameStateManager_Return GSM_Result = (GameStateManager_Return)Request_Event(EventPath, EndPoint, string.Empty);
 
                 Check_GameStateManager_Status = (bool)GSM_Result.return_Data;
 
@@ -226,7 +226,7 @@ namespace Coup_Mobile.InGame.GameManager.GameState
 
             while (!Check_GameAssistManager_Status)
             {
-                GameAssistManager_Return GAM_Result = (GameAssistManager_Return)Request_Event(EventPath, EndPoint, null);
+                GameAssistManager_Return GAM_Result = (GameAssistManager_Return)Request_Event(EventPath, EndPoint, string.Empty);
 
                 Check_GameAssistManager_Status = (bool)GAM_Result.return_Data;
 

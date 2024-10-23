@@ -8,9 +8,10 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using Coup_Mobile.InGame.PlayerData;
 using Coup_Mobile.InGame.GameManager;
+using Coup_Mobile.InGame.GameManager.Ui;
 using Coup_Mobile.InGame.GameManager.ReportData;
 
-public class Display_PreviewCard : MonoBehaviour
+public class Display_PreviewCard : MonoBehaviour, Display_UiController
 {
     #region Common Field
     [Header("Common Field")]
@@ -20,7 +21,7 @@ public class Display_PreviewCard : MonoBehaviour
     [SerializeField] private List<GameObject> card_Disable;
     [SerializeField] private Button close_WindowButton;
     [SerializeField] private Button open_WindowButton;
-    [SerializeField] private double spacing = 450d;
+    //[SerializeField] private double spacing = 450d;
     [SerializeField] private int amountOfCards_Group = 5;
 
     [Space(5)]
@@ -56,12 +57,9 @@ public class Display_PreviewCard : MonoBehaviour
 
     #endregion
 
-    public void Start()
-    {
-        Install_DisplaySystem();
-    }
+    #region Event Control
 
-    private async void Install_DisplaySystem()
+    public async void StarterAndSetting(object packetData)
     {
         isHaveCard = false;
 
@@ -76,6 +74,28 @@ public class Display_PreviewCard : MonoBehaviour
 
         gameObject.SetActive(false);
     }
+
+    public void CommandExecute(string target, object packetData)
+    {
+        switch (target)
+        {
+            case "OpenDisplayView":
+                break;
+            case "CloseDisPlayView":
+                break;
+            // Add More Request In Here.
+        }
+    }
+
+    public object ReturnExecute(string target, object packetData)
+    {
+        return target switch
+        {
+            _ => throw new ArgumentException($"Display_PreviewCard -> ReturnExecute | Unknown Topic : {target}"),
+        };
+    }
+
+    #endregion
 
     private async Task FindRef()
     {
@@ -340,7 +360,10 @@ public class Display_PreviewCard : MonoBehaviour
 
         // Hide the Display Card in a Window.
         gameObject.SetActive(false);
+
     }
+
+
 
     #endregion
 }

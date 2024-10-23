@@ -1,6 +1,7 @@
+using Coup_Mobile.InGame.GameManager.Ui;
 using UnityEngine;
 
-public class CameraControl : MonoBehaviour
+public class CameraControl : MonoBehaviour , Display_UiController
 {
     public GameObject cursor;
     public Camera _camera;
@@ -92,5 +93,20 @@ public class CameraControl : MonoBehaviour
         float distance;
         ground.Raycast(movePos , out distance);
         return movePos.GetPoint(distance);
+    }
+
+    public void StarterAndSetting(object packetData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public void CommandExecute(string target, object packetData)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public object ReturnExecute(string target, object packetData)
+    {
+        throw new System.NotImplementedException();
     }
 }
